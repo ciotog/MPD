@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ struct id3_tag;
 struct ReplayGainInfo;
 
 /**
- * Parse the RVA2 tag, and fill the #replay_gain_info struct.  This is
+ * Parse the RVA2 tag, and fill the #ReplayGainInfo struct.  This is
  * used by decoder plugins with ID3 support.
  *
  * @return true on success

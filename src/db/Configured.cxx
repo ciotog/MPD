@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,8 @@
 #include "Configured.hxx"
 #include "DatabaseGlue.hxx"
 #include "config/ConfigGlobal.hxx"
-#include "config/ConfigData.hxx"
+#include "config/Param.hxx"
+#include "config/Block.hxx"
 #include "config/ConfigError.hxx"
 #include "fs/AllocatedPath.hxx"
 #include "fs/StandardDirectory.hxx"
@@ -32,8 +33,8 @@ Database *
 CreateConfiguredDatabase(EventLoop &loop, DatabaseListener &listener,
 			 Error &error)
 {
-	const struct config_param *param = config_get_param(CONF_DATABASE);
-	const struct config_param *path = config_get_param(CONF_DB_FILE);
+	const auto *param = config_get_block(ConfigBlockOption::DATABASE);
+	const auto *path = config_get_param(ConfigOption::DB_FILE);
 
 	if (param != nullptr && path != nullptr) {
 		error.Format(config_domain,
@@ -42,10 +43,10 @@ CreateConfiguredDatabase(EventLoop &loop, DatabaseListener &listener,
 		return nullptr;
 	}
 
-	struct config_param *allocated = nullptr;
+	ConfigBlock *allocated = nullptr;
 
 	if (param == nullptr && path != nullptr) {
-		allocated = new config_param("database", path->line);
+		allocated = new ConfigBlock(path->line);
 		allocated->AddBlockParam("path", path->value.c_str(),
 					 path->line);
 		param = allocated;
@@ -58,10 +59,14 @@ CreateConfiguredDatabase(EventLoop &loop, DatabaseListener &listener,
 		if (cache_dir.IsNull())
 			return nullptr;
 
-		const auto db_file = AllocatedPath::Build(cache_dir, "mpd.db");
+		const auto db_file = AllocatedPath::Build(cache_dir,
+							  PATH_LITERAL("mpd.db"));
+		const auto db_file_utf8 = db_file.ToUTF8();
+		if (db_file_utf8.empty())
+			return nullptr;
 
-		allocated = new config_param("database");
-		allocated->AddBlockParam("path", db_file.c_str(), -1);
+		allocated = new ConfigBlock();
+		allocated->AddBlockParam("path", db_file_utf8.c_str(), -1);
 		param = allocated;
 	}
 

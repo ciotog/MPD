@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -87,11 +87,13 @@ tag_file_scan(Path path_fs, const tag_handler &handler, void *handler_ctx)
 
 	/* check if there's a suffix and a plugin */
 
-	const char *suffix = uri_get_suffix(path_fs.c_str());
+	const auto *suffix = path_fs.GetSuffix();
 	if (suffix == nullptr)
 		return false;
 
-	TagFileScan tfs(path_fs, suffix, handler, handler_ctx);
+	const auto suffix_utf8 = Path::FromFS(suffix).ToUTF8();
+
+	TagFileScan tfs(path_fs, suffix_utf8.c_str(), handler, handler_ctx);
 	return decoder_plugins_try([&](const DecoderPlugin &plugin){
 			return tfs.Scan(plugin);
 		});

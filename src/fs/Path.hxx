@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <string.h>
 
+class AllocatedPath;
+
 /**
  * A path name in the native file system character set.
  *
@@ -40,7 +42,7 @@ class Path {
 	typedef PathTraitsFS::pointer pointer;
 	typedef PathTraitsFS::const_pointer const_pointer;
 
-	const char *value;
+	const_pointer value;
 
 	constexpr Path(const_pointer _value):value(_value) {}
 
@@ -98,7 +100,7 @@ public:
 	size_t length() const {
 		assert(value != nullptr);
 
-		return strlen(value);
+		return PathTraitsFS::GetLength(value);
 	}
 
 	/**
@@ -121,6 +123,16 @@ public:
 	}
 
 	/**
+	 * Does the path contain a newline character?  (Which is
+	 * usually rejected by MPD because its protocol cannot
+	 * transfer newline characters).
+	 */
+	gcc_pure
+	bool HasNewline() const {
+		return PathTraitsFS::Find(value, '\n') != nullptr;
+	}
+
+	/**
 	 * Convert the path to UTF-8.
 	 * Returns empty string on error or if this instance is "nulled"
 	 * (#IsNull returns true).
@@ -129,20 +141,39 @@ public:
 	std::string ToUTF8() const;
 
 	/**
+	 * Determine the "base" file name.
+	 * The return value points inside this object.
+	 */
+	gcc_pure
+	Path GetBase() const {
+		return FromFS(PathTraitsFS::GetBase(value));
+	}
+
+	/**
+	 * Gets directory name of this path.
+	 * Returns a "nulled" instance on error.
+	 */
+	gcc_pure
+	AllocatedPath GetDirectoryName() const;
+
+	/**
 	 * Determine the relative part of the given path to this
 	 * object, not including the directory separator.  Returns an
 	 * empty string if the given path equals this object or
 	 * nullptr on mismatch.
 	 */
 	gcc_pure
-	const char *RelativeFS(const char *other_fs) const {
-		return PathTraitsFS::Relative(value, other_fs);
+	const_pointer Relative(Path other_fs) const {
+		return PathTraitsFS::Relative(c_str(), other_fs.c_str());
 	}
 
 	gcc_pure
-	bool IsAbsolute() {
+	bool IsAbsolute() const {
 		return PathTraitsFS::IsAbsolute(c_str());
 	}
+
+	gcc_pure
+	const_pointer GetSuffix() const;
 };
 
 #endif

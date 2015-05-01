@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class BufferedReader;
 class TextFile {
 	FileReader *const file_reader;
 
-#ifdef HAVE_ZLIB
+#ifdef ENABLE_ZLIB
 	AutoGunzipReader *const gunzip_reader;
 #endif
 
@@ -59,7 +59,6 @@ public:
 	 * Use Check() after nullptr has been returned to check
 	 * whether an error occurred or end-of-file has been reached.
 	 *
-	 * @param file the source file, opened in text mode
 	 * @return a pointer to the line, or nullptr on end-of-file or error
 	 */
 	char *ReadLine();

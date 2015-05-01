@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,13 +32,13 @@ struct ArchivePlugin {
 	 * have/need one this must false if there is an error and
 	 * true otherwise
 	 */
-	bool (*init)(void);
+	bool (*init)();
 
 	/**
 	 * optional, set this to nullptr if the archive plugin doesn't
 	 * have/need one
 	 */
-	void (*finish)(void);
+	void (*finish)();
 
 	/**
 	 * tryes to open archive file and associates handle with archive

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,20 +29,19 @@
 #include <cstdlib>
 #include <atomic>
 
-#include <glib.h>
-
 #include <windows.h>
+#include <tchar.h>
 
 static int service_argc;
 static char **service_argv;
-static char service_name[] = "";
+static TCHAR service_name[] = _T("");
 static std::atomic_bool running;
 static SERVICE_STATUS_HANDLE service_handle;
 
 static void WINAPI
-service_main(DWORD argc, CHAR *argv[]);
+service_main(DWORD argc, LPTSTR argv[]);
 
-static SERVICE_TABLE_ENTRY service_registry[] = {
+static constexpr SERVICE_TABLE_ENTRY service_registry[] = {
 	{service_name, service_main},
 	{nullptr, nullptr}
 };
@@ -80,21 +79,14 @@ service_dispatcher(gcc_unused DWORD control, gcc_unused DWORD event_type,
 }
 
 static void WINAPI
-service_main(gcc_unused DWORD argc, gcc_unused CHAR *argv[])
+service_main(gcc_unused DWORD argc, gcc_unused LPTSTR argv[])
 {
-	DWORD error_code;
-	gchar* error_message;
-
 	service_handle =
 		RegisterServiceCtrlHandlerEx(service_name,
 					     service_dispatcher, nullptr);
 
-	if (service_handle == 0) {
-		error_code = GetLastError();
-		error_message = g_win32_error_message(error_code);
-		FormatFatalError("RegisterServiceCtrlHandlerEx() failed: %s",
-				 error_message);
-	}
+	if (service_handle == 0)
+		FatalSystemError("RegisterServiceCtrlHandlerEx() failed");
 
 	service_notify_status(SERVICE_START_PENDING);
 	mpd_main(service_argc, service_argv);
@@ -131,27 +123,22 @@ console_handler(DWORD event)
 
 int win32_main(int argc, char *argv[])
 {
-	DWORD error_code;
-	gchar* error_message;
-
 	service_argc = argc;
 	service_argv = argv;
 
 	if (StartServiceCtrlDispatcher(service_registry))
 		return 0; /* run as service successefully */
 
-	error_code = GetLastError();
+	const DWORD error_code = GetLastError();
 	if (error_code == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
 		/* running as console app */
 		running.store(false);
-		SetConsoleTitle("Music Player Daemon");
+		SetConsoleTitle(_T("Music Player Daemon"));
 		SetConsoleCtrlHandler(console_handler, TRUE);
 		return mpd_main(argc, argv);
 	}
 
-	error_message = g_win32_error_message(error_code);
-	FormatFatalError("StartServiceCtrlDispatcher() failed: %s",
-			 error_message);
+	FatalSystemError("StartServiceCtrlDispatcher() failed", error_code);
 }
 
 void win32_app_started()

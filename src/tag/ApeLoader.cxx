@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -103,7 +103,7 @@ ape_scan_internal(FILE *fp, ApeTagCallback callback)
 bool
 tag_ape_scan(Path path_fs, ApeTagCallback callback)
 {
-	FILE *fp = FOpen(path_fs, "rb");
+	FILE *fp = FOpen(path_fs, PATH_LITERAL("rb"));
 	if (fp == nullptr)
 		return false;
 

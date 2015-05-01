@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -84,7 +84,7 @@ public:
 	}
 
 	/* virtual methods from class Storage */
-	bool GetInfo(const char *uri_utf8, bool follow, FileInfo &info,
+	bool GetInfo(const char *uri_utf8, bool follow, StorageFileInfo &info,
 		     Error &error) override;
 
 	StorageDirectoryReader *OpenDirectory(const char *uri_utf8,
@@ -146,6 +146,7 @@ private:
 
 		const ScopeLock protect(mutex);
 		state = _state;
+		last_error.Clear();
 		last_error.Set(error);
 		cond.broadcast();
 	}
@@ -244,14 +245,14 @@ NfsStorage::MapToRelativeUTF8(const char *uri_utf8) const
 }
 
 static void
-Copy(FileInfo &info, const struct stat &st)
+Copy(StorageFileInfo &info, const struct stat &st)
 {
 	if (S_ISREG(st.st_mode))
-		info.type = FileInfo::Type::REGULAR;
+		info.type = StorageFileInfo::Type::REGULAR;
 	else if (S_ISDIR(st.st_mode))
-		info.type = FileInfo::Type::DIRECTORY;
+		info.type = StorageFileInfo::Type::DIRECTORY;
 	else
-		info.type = FileInfo::Type::OTHER;
+		info.type = StorageFileInfo::Type::OTHER;
 
 	info.size = st.st_size;
 	info.mtime = st.st_mtime;
@@ -261,11 +262,11 @@ Copy(FileInfo &info, const struct stat &st)
 
 class NfsGetInfoOperation final : public BlockingNfsOperation {
 	const char *const path;
-	FileInfo &info;
+	StorageFileInfo &info;
 
 public:
 	NfsGetInfoOperation(NfsConnection &_connection, const char *_path,
-			    FileInfo &_info)
+			    StorageFileInfo &_info)
 		:BlockingNfsOperation(_connection), path(_path), info(_info) {}
 
 protected:
@@ -280,14 +281,14 @@ protected:
 
 bool
 NfsStorage::GetInfo(const char *uri_utf8, gcc_unused bool follow,
-		    FileInfo &info, Error &error)
+		    StorageFileInfo &info, Error &error)
 {
 	const std::string path = UriToNfsPath(uri_utf8, error);
 	if (path.empty())
 		return false;
 
 	if (!WaitConnected(error))
-		return nullptr;
+		return false;
 
 	NfsGetInfoOperation operation(*connection, path.c_str(), info);
 	return operation.Run(error);
@@ -303,19 +304,19 @@ SkipNameFS(const char *name)
 }
 
 static void
-Copy(FileInfo &info, const struct nfsdirent &ent)
+Copy(StorageFileInfo &info, const struct nfsdirent &ent)
 {
 	switch (ent.type) {
 	case NF3REG:
-		info.type = FileInfo::Type::REGULAR;
+		info.type = StorageFileInfo::Type::REGULAR;
 		break;
 
 	case NF3DIR:
-		info.type = FileInfo::Type::DIRECTORY;
+		info.type = StorageFileInfo::Type::DIRECTORY;
 		break;
 
 	default:
-		info.type = FileInfo::Type::OTHER;
+		info.type = StorageFileInfo::Type::OTHER;
 		break;
 	}
 

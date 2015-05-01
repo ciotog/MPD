@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,9 +39,11 @@ const ArchivePlugin *
 archive_plugin_from_name(const char *name);
 
 /* this is where we "load" all the "plugins" ;-) */
-void archive_plugin_init_all(void);
+void
+archive_plugin_init_all();
 
 /* this is where we "unload" all the "plugins" */
-void archive_plugin_deinit_all(void);
+void
+archive_plugin_deinit_all();
 
 #endif

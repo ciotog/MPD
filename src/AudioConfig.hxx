@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@ AudioFormat
 getOutputAudioFormat(AudioFormat inFormat);
 
 /* make sure initPlayerData is called before this function!! */
-void initAudioConfig(void);
+void
+initAudioConfig();
 
 #endif

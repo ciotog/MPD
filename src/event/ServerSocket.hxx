@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,16 +24,10 @@
 
 #include <stddef.h>
 
-struct sockaddr;
+class SocketAddress;
 class EventLoop;
 class Error;
 class AllocatedPath;
-
-typedef void (*server_socket_callback_t)(int fd,
-					 const struct sockaddr *address,
-					 size_t address_length, int uid,
-					 void *ctx);
-
 class OneServerSocket;
 
 /**
@@ -57,7 +51,7 @@ public:
 	}
 
 private:
-	OneServerSocket &AddAddress(const sockaddr &address, size_t length);
+	OneServerSocket &AddAddress(SocketAddress address);
 
 	/**
 	 * Add a listener on a port on all IPv4 interfaces.
@@ -78,8 +72,7 @@ public:
 	 * Add a listener on a port on all interfaces.
 	 *
 	 * @param port the TCP port
-	 * @param error_r location to store the error occurring, or nullptr to
-	 * ignore errors
+	 * @param error location to store the error occurring
 	 * @return true on success
 	 */
 	bool AddPort(unsigned port, Error &error);
@@ -90,8 +83,7 @@ public:
 	 *
 	 * @param hostname the host name to be resolved
 	 * @param port the TCP port
-	 * @param error_r location to store the error occurring, or nullptr to
-	 * ignore errors
+	 * @param error location to store the error occurring
 	 * @return true on success
 	 */
 	bool AddHost(const char *hostname, unsigned port, Error &error);
@@ -100,8 +92,7 @@ public:
 	 * Add a listener on a Unix domain socket.
 	 *
 	 * @param path the absolute socket path
-	 * @param error_r location to store the error occurring, or nullptr to
-	 * ignore errors
+	 * @param error location to store the error occurring
 	 * @return true on success
 	 */
 	bool AddPath(AllocatedPath &&path, Error &error);
@@ -117,8 +108,7 @@ public:
 	void Close();
 
 protected:
-	virtual void OnAccept(int fd, const sockaddr &address,
-			      size_t address_length, int uid) = 0;
+	virtual void OnAccept(int fd, SocketAddress address, int uid) = 0;
 };
 
 #endif

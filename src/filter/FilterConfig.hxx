@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class Error;
  * configured filter sections.
  * @param chain the chain to append filters on
  * @param spec the filter chain specification
- * @param error_r space to return an error description
+ * @param error space to return an error description
  * @return true on success
  */
 bool

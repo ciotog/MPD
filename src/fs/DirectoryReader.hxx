@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,89 @@
 
 #include "check.h"
 #include "Path.hxx"
+
+#ifdef WIN32
+
+#include <windows.h>
+#include <tchar.h>
+
+/**
+ * Reader for directory entries.
+ */
+class DirectoryReader {
+	const HANDLE handle;
+	WIN32_FIND_DATA data;
+	bool first;
+
+	class MakeWildcardPath {
+		PathTraitsFS::pointer path;
+
+	public:
+		MakeWildcardPath(PathTraitsFS::const_pointer _path) {
+			auto l = _tcslen(_path);
+			path = new PathTraitsFS::value_type[l + 3];
+			_tcscpy(path, _path);
+			path[l] = _T('\\');
+			path[l + 1] = _T('*');
+			path[l + 2] = 0;
+		}
+
+		~MakeWildcardPath() {
+			delete[] path;
+		}
+
+		operator PathTraitsFS::const_pointer() const {
+			return path;
+		}
+	};
+
+public:
+	/**
+	 * Creates new directory reader for the specified #dir.
+	 */
+	explicit DirectoryReader(Path dir)
+		:handle(FindFirstFile(MakeWildcardPath(dir.c_str()), &data)),
+		 first(true) {}
+
+	DirectoryReader(const DirectoryReader &other) = delete;
+	DirectoryReader &operator=(const DirectoryReader &other) = delete;
+
+	/**
+	 * Destroys this instance.
+	 */
+	~DirectoryReader() {
+		if (!HasFailed())
+			FindClose(handle);
+	}
+
+	/**
+	 * Checks if directory failed to open.
+	 */
+	bool HasFailed() const {
+		return handle == INVALID_HANDLE_VALUE;
+	}
+
+	/**
+	 * Reads next directory entry.
+	 */
+	bool ReadEntry() {
+		if (first) {
+			first = false;
+			return true;
+		}
+
+		return FindNextFile(handle, &data) != 0;
+	}
+
+	/**
+	 * Extracts directory entry that was previously read by #ReadEntry.
+	 */
+	Path GetEntry() const {
+		return Path::FromFS(data.cFileName);
+	}
+};
+
+#else
 
 #include <dirent.h>
 
@@ -83,5 +166,7 @@ public:
 		return Path::FromFS(ent->d_name);
 	}
 };
+
+#endif
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,6 +50,23 @@ uri_get_suffix(const char *uri)
 
 	if (strpbrk(suffix, "/\\") != nullptr)
 		return nullptr;
+
+	return suffix;
+}
+
+const char *
+uri_get_suffix(const char *uri, UriSuffixBuffer &buffer)
+{
+	const char *suffix = uri_get_suffix(uri);
+	if (suffix == nullptr)
+		return nullptr;
+
+	const char *q = strchr(suffix, '?');
+	if (q != nullptr && size_t(q - suffix) < sizeof(buffer.data)) {
+		memcpy(buffer.data, suffix, q - suffix);
+		buffer.data[q - suffix] = 0;
+		suffix = buffer.data;
+	}
 
 	return suffix;
 }
@@ -123,8 +140,11 @@ uri_remove_auth(const char *uri)
 bool
 uri_is_child(const char *parent, const char *child)
 {
+#if !CLANG_CHECK_VERSION(3,6)
+	/* disabled on clang due to -Wtautological-pointer-compare */
 	assert(parent != nullptr);
 	assert(child != nullptr);
+#endif
 
 	const size_t parent_length = strlen(parent);
 	return memcmp(parent, child, parent_length) == 0 &&

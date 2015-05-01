@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "FlacMetadata.hxx"
 #include "OggCodec.hxx"
 #include "fs/Path.hxx"
+#include "fs/NarrowPath.hxx"
 #include "util/Error.hxx"
 #include "Log.hxx"
 
@@ -84,7 +85,7 @@ flac_scan_file(Path path_fs,
 	       const struct tag_handler *handler, void *handler_ctx)
 {
 	FlacMetadataChain chain;
-	if (!chain.Read(path_fs.c_str())) {
+	if (!chain.Read(NarrowPath(path_fs))) {
 		FormatDebug(flac_domain,
 			    "Failed to read FLAC tags: %s",
 			    chain.GetStatusString());
@@ -291,7 +292,7 @@ flac_decode(Decoder &decoder, InputStream &input_stream)
 }
 
 static bool
-oggflac_init(gcc_unused const config_param &param)
+oggflac_init(gcc_unused const ConfigBlock &block)
 {
 	return !!FLAC_API_SUPPORTS_OGG_FLAC;
 }
@@ -301,7 +302,7 @@ oggflac_scan_file(Path path_fs,
 		  const struct tag_handler *handler, void *handler_ctx)
 {
 	FlacMetadataChain chain;
-	if (!chain.ReadOgg(path_fs.c_str())) {
+	if (!chain.ReadOgg(NarrowPath(path_fs))) {
 		FormatDebug(flac_domain,
 			    "Failed to read OggFLAC tags: %s",
 			    chain.GetStatusString());

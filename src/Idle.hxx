@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -78,13 +78,13 @@ idle_add(unsigned flags);
  * Atomically reads and resets the global idle flags value.
  */
 unsigned
-idle_get(void);
+idle_get();
 
 /**
  * Get idle names
  */
 const char*const*
-idle_get_names(void);
+idle_get_names();
 
 /**
  * Parse an idle name and return its mask.  Returns 0 if the given

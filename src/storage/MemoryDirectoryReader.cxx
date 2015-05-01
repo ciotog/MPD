@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,8 @@ MemoryStorageDirectoryReader::Read()
 }
 
 bool
-MemoryStorageDirectoryReader::GetInfo(gcc_unused bool follow, FileInfo &info,
+MemoryStorageDirectoryReader::GetInfo(gcc_unused bool follow,
+				      StorageFileInfo &info,
 				      gcc_unused Error &error)
 {
 	assert(!first);

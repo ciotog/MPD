@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ win32_main(int argc, char *argv[]);
  * This function should be called just before entering main loop.
  */
 void
-win32_app_started(void);
+win32_app_started();
 
 /**
  * When running as a service reports to service control manager
@@ -71,18 +71,7 @@ win32_app_started(void);
  * This function should be called just after leaving main loop.
  */
 void
-win32_app_stopping(void);
-
-#endif
-
-#ifdef __APPLE__
-
-/* Runs the OS X native event loop in the main thread, and runs
- * mpd_main on a new thread. This lets CoreAudio receive route
- * change notifications (e.g. plugging or unplugging headphones).
- * All hardware output on OS X ultimately uses CoreAudio internally.
- */
-int osx_main(int argc, char *argv[]);
+win32_app_stopping();
 
 #endif
 

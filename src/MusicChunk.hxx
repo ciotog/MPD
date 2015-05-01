@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -119,13 +119,10 @@ struct MusicChunk {
 	 * where you may write into.  After you are finished, call
 	 * Expand().
 	 *
-	 * @param chunk the MusicChunk object
-	 * @param audio_format the audio format for the appended data;
+	 * @param af the audio format for the appended data;
 	 * must stay the same for the life cycle of this chunk
 	 * @param data_time the time within the song
 	 * @param bit_rate the current bit rate of the source file
-	 * @param max_length_r the maximum write length is returned
-	 * here
 	 * @return a writable buffer, or nullptr if the chunk is full
 	 */
 	WritableBuffer<void> Write(AudioFormat af,
@@ -136,8 +133,7 @@ struct MusicChunk {
 	 * Increases the length of the chunk after the caller has written to
 	 * the buffer returned by Write().
 	 *
-	 * @param chunk the MusicChunk object
-	 * @param audio_format the audio format for the appended data; must
+	 * @param af the audio format for the appended data; must
 	 * stay the same for the life cycle of this chunk
 	 * @param length the number of bytes which were appended
 	 * @return true if the chunk is full

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,9 +36,9 @@ public:
 	 * Shift the given sample by #SBITS-#DBITS to the right, and
 	 * apply dithering.
 	 *
-	 * @param ST the input sample type
-	 * @param SBITS the input bit width
-	 * @param DBITS the output bit width
+	 * @tparam ST the input sample type
+	 * @tparam SBITS the input bit width
+	 * @tparam DBITS the output bit width
 	 * @param sample the input sample value
 	 */
 	template<typename ST, unsigned SBITS, unsigned DBITS>

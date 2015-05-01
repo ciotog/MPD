@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 
 #include <string>
 
-struct FileInfo;
+struct StorageFileInfo;
 class AllocatedPath;
 class Error;
 
@@ -36,7 +36,8 @@ public:
 	virtual ~StorageDirectoryReader() {}
 
 	virtual const char *Read() = 0;
-	virtual bool GetInfo(bool follow, FileInfo &info, Error &error) = 0;
+	virtual bool GetInfo(bool follow, StorageFileInfo &info,
+			     Error &error) = 0;
 };
 
 class Storage {
@@ -45,7 +46,8 @@ public:
 	Storage(const Storage &) = delete;
 	virtual ~Storage() {}
 
-	virtual bool GetInfo(const char *uri_utf8, bool follow, FileInfo &info,
+	virtual bool GetInfo(const char *uri_utf8, bool follow,
+			     StorageFileInfo &info,
 			     Error &error) = 0;
 
 	virtual StorageDirectoryReader *OpenDirectory(const char *uri_utf8,

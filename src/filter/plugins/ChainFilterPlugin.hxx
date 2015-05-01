@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ class Filter;
  * Creates a new filter chain.
  */
 Filter *
-filter_chain_new(void);
+filter_chain_new();
 
 /**
  * Appends a new filter at the end of the filter chain.  You must call

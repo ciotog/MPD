@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "Compiler.h"
 
 class Error;
+class FileDescriptor;
 
 typedef void (*mpd_inotify_callback_t)(int wd, unsigned mask,
 				       const char *name, void *ctx);
@@ -33,7 +34,8 @@ class InotifySource final : private SocketMonitor {
 	void *callback_ctx;
 
 	InotifySource(EventLoop &_loop,
-		      mpd_inotify_callback_t callback, void *ctx, int fd);
+		      mpd_inotify_callback_t callback, void *ctx,
+		      FileDescriptor fd);
 
 public:
 	~InotifySource() {
@@ -41,10 +43,11 @@ public:
 	}
 
 	/**
-	 * Creates a new inotify source and registers it in the GLib main
-	 * loop.
+	 * Creates a new inotify source and registers it in the
+	 * #EventLoop.
 	 *
-	 * @param a callback invoked for events received from the kernel
+	 * @param callback a callback invoked for events received from
+	 * the kernel
 	 */
 	static InotifySource *Create(EventLoop &_loop,
 				     mpd_inotify_callback_t callback,

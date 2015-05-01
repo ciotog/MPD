@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -200,6 +200,10 @@ public:
 		return mime.empty() ? nullptr : mime.c_str();
 	}
 
+	void ClearMimeType() {
+		mime.clear();
+	}
+
 	gcc_nonnull_all
 	void SetMimeType(const char *_mime) {
 		assert(!ready);
@@ -346,7 +350,6 @@ public:
 	 *
 	 * The caller must lock the mutex.
 	 *
-	 * @param is the InputStream object
 	 * @param ptr the buffer to read into
 	 * @param size the maximum number of bytes to read
 	 * @return the number of bytes read

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "Compiler.h"
 
 struct Directory;
-struct FileInfo;
+struct StorageFileInfo;
 class Storage;
 class StorageDirectoryReader;
 
@@ -33,14 +33,14 @@ class StorageDirectoryReader;
  * returning them.
  */
 bool
-GetInfo(Storage &storage, const char *uri_utf8, FileInfo &info);
+GetInfo(Storage &storage, const char *uri_utf8, StorageFileInfo &info);
 
 /**
  * Wrapper for LocalDirectoryReader::GetInfo() that logs errors
  * instead of returning them.
  */
 bool
-GetInfo(StorageDirectoryReader &reader, FileInfo &info);
+GetInfo(StorageDirectoryReader &reader, StorageFileInfo &info);
 
 gcc_pure
 bool

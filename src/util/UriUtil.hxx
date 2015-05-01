@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,6 +41,17 @@ uri_get_scheme(const char *uri);
 gcc_pure
 const char *
 uri_get_suffix(const char *uri);
+
+struct UriSuffixBuffer {
+	char data[8];
+};
+
+/**
+ * Returns the file name suffix, ignoring the query string.
+ */
+gcc_pure
+const char *
+uri_get_suffix(const char *uri, UriSuffixBuffer &buffer);
 
 /**
  * Returns true if this is a safe "local" URI:

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,51 @@
 
 #include <assert.h>
 #include <string.h>
+
+bool
+StringStartsWith(const char *haystack, const char *needle)
+{
+	const size_t length = strlen(needle);
+	return memcmp(haystack, needle, length) == 0;
+}
+
+bool
+StringEndsWith(const char *haystack, const char *needle)
+{
+	const size_t haystack_length = strlen(haystack);
+	const size_t needle_length = strlen(needle);
+
+	return haystack_length >= needle_length &&
+		memcmp(haystack + haystack_length - needle_length,
+		       needle, needle_length) == 0;
+}
+
+const char *
+FindStringSuffix(const char *p, const char *suffix)
+{
+	const size_t p_length = strlen(p);
+	const size_t suffix_length = strlen(suffix);
+
+	if (p_length < suffix_length)
+		return nullptr;
+
+	const char *q = p + p_length - suffix_length;
+	return memcmp(q, suffix, suffix_length) == 0
+		? q
+		: nullptr;
+}
+
+char *
+CopyString(char *gcc_restrict dest, const char *gcc_restrict src, size_t size)
+{
+	size_t length = strlen(src);
+	if (length >= size)
+		length = size - 1;
+
+	char *p = std::copy_n(src, length, dest);
+	*p = '\0';
+	return p;
+}
 
 const char *
 StripLeft(const char *p)
@@ -79,36 +124,6 @@ Strip(char *p)
 }
 
 bool
-StringStartsWith(const char *haystack, const char *needle)
-{
-	const size_t length = strlen(needle);
-	return memcmp(haystack, needle, length) == 0;
-}
-
-bool
-StringEndsWith(const char *haystack, const char *needle)
-{
-	const size_t haystack_length = strlen(haystack);
-	const size_t needle_length = strlen(needle);
-
-	return haystack_length >= needle_length &&
-		memcmp(haystack + haystack_length - needle_length,
-		       needle, needle_length) == 0;
-}
-
-char *
-CopyString(char *gcc_restrict dest, const char *gcc_restrict src, size_t size)
-{
-	size_t length = strlen(src);
-	if (length >= size)
-		length = size - 1;
-
-	char *p = std::copy(src, src + length, dest);
-	*p = '\0';
-	return p;
-}
-
-bool
 string_array_contains(const char *const* haystack, const char *needle)
 {
 	assert(haystack != nullptr);
@@ -119,4 +134,24 @@ string_array_contains(const char *const* haystack, const char *needle)
 			return true;
 
 	return false;
+}
+
+void
+ToUpperASCII(char *dest, const char *src, size_t size)
+{
+	assert(dest != nullptr);
+	assert(src != nullptr);
+	assert(size > 1);
+
+	char *const end = dest + size - 1;
+
+	do {
+		char ch = *src++;
+		if (ch == 0)
+			break;
+
+		*dest++ = ToUpperASCII(ch);
+	} while (dest < end);
+
+	*dest = 0;
 }

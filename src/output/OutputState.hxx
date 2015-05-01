@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,6 +41,6 @@ audio_output_state_save(BufferedOutputStream &os,
  * whether the state has changed and the state file should be saved.
  */
 unsigned
-audio_output_state_get_version(void);
+audio_output_state_get_version();
 
 #endif

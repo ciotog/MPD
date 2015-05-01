@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 #ifndef MPD_PLAYLIST_PLUGIN_HXX
 #define MPD_PLAYLIST_PLUGIN_HXX
 
-struct config_param;
+struct ConfigBlock;
 class InputStream;
 struct Tag;
 class Mutex;
@@ -33,18 +33,18 @@ struct playlist_plugin {
 	/**
 	 * Initialize the plugin.  Optional method.
 	 *
-	 * @param param a configuration block for this plugin, or nullptr
+	 * @param block a configuration block for this plugin, or nullptr
 	 * if none is configured
 	 * @return true if the plugin was initialized successfully,
 	 * false if the plugin is not available
 	 */
-	bool (*init)(const config_param &param);
+	bool (*init)(const ConfigBlock &block);
 
 	/**
 	 * Deinitialize a plugin which was initialized successfully.
 	 * Optional method.
 	 */
-	void (*finish)(void);
+	void (*finish)();
 
 	/**
 	 * Opens the playlist on the specified URI.  This URI has
@@ -68,17 +68,17 @@ struct playlist_plugin {
 /**
  * Initialize a plugin.
  *
- * @param param a configuration block for this plugin, or nullptr if none
+ * @param block a configuration block for this plugin, or nullptr if none
  * is configured
  * @return true if the plugin was initialized successfully, false if
  * the plugin is not available
  */
 static inline bool
 playlist_plugin_init(const struct playlist_plugin *plugin,
-		     const config_param &param)
+		     const ConfigBlock &block)
 {
 	return plugin->init != nullptr
-		? plugin->init(param)
+		? plugin->init(block)
 		: true;
 }
 

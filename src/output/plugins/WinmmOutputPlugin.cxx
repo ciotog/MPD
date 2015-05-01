@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,9 +22,11 @@
 #include "../OutputAPI.hxx"
 #include "pcm/PcmBuffer.hxx"
 #include "mixer/MixerList.hxx"
+#include "fs/AllocatedPath.hxx"
 #include "util/Error.hxx"
 #include "util/Domain.hxx"
 #include "util/Macros.hxx"
+#include "util/StringUtil.hxx"
 
 #include <stdlib.h>
 #include <string.h>
@@ -56,6 +58,18 @@ struct WinmmOutput {
 
 static constexpr Domain winmm_output_domain("winmm_output");
 
+static void
+SetWaveOutError(Error &error, MMRESULT result, const char *prefix)
+{
+	char buffer[256];
+	if (waveOutGetErrorTextA(result, buffer,
+				 ARRAY_SIZE(buffer)) == MMSYSERR_NOERROR)
+		error.Format(winmm_output_domain, int(result),
+			     "%s: %s", prefix, buffer);
+	else
+		error.Set(winmm_output_domain, int(result), prefix);
+}
+
 HWAVEOUT
 winmm_output_get_handle(WinmmOutput &output)
 {
@@ -83,13 +97,23 @@ get_device_id(const char *device_name, UINT *device_id, Error &error)
 	char *endptr;
 	UINT id = strtoul(device_name, &endptr, 0);
 	if (endptr > device_name && *endptr == 0) {
-		if (id >= numdevs)
-			goto fail;
+		if (id >= numdevs) {
+			error.Format(winmm_output_domain,
+				     "device \"%s\" is not found",
+				     device_name);
+			return false;
+		}
+
 		*device_id = id;
 		return true;
 	}
 
 	/* check for device name */
+	const AllocatedPath device_name_fs =
+		AllocatedPath::FromUTF8(device_name, error);
+	if (device_name_fs.IsNull())
+		return false;
+
 	for (UINT i = 0; i < numdevs; i++) {
 		WAVEOUTCAPS caps;
 		MMRESULT result = waveOutGetDevCaps(i, &caps, sizeof(caps));
@@ -97,28 +121,27 @@ get_device_id(const char *device_name, UINT *device_id, Error &error)
 			continue;
 		/* szPname is only 32 chars long, so it is often truncated.
 		   Use partial match to work around this. */
-		if (strstr(device_name, caps.szPname) == device_name) {
+		if (StringStartsWith(device_name_fs.c_str(), caps.szPname)) {
 			*device_id = i;
 			return true;
 		}
 	}
 
-fail:
 	error.Format(winmm_output_domain,
 		     "device \"%s\" is not found", device_name);
 	return false;
 }
 
 static AudioOutput *
-winmm_output_init(const config_param &param, Error &error)
+winmm_output_init(const ConfigBlock &block, Error &error)
 {
 	WinmmOutput *wo = new WinmmOutput();
-	if (!wo->base.Configure(param, error)) {
+	if (!wo->base.Configure(block, error)) {
 		delete wo;
 		return nullptr;
 	}
 
-	const char *device = param.GetBlockValue("device");
+	const char *device = block.GetBlockValue("device");
 	if (!get_device_id(device, &wo->device_id, error)) {
 		delete wo;
 		return nullptr;
@@ -179,7 +202,7 @@ winmm_output_open(AudioOutput *ao, AudioFormat &audio_format,
 				      (DWORD_PTR)wo->event, 0, CALLBACK_EVENT);
 	if (result != MMSYSERR_NOERROR) {
 		CloseHandle(wo->event);
-		error.Set(winmm_output_domain, "waveOutOpen() failed");
+		SetWaveOutError(error, result, "waveOutOpen() failed");
 		return false;
 	}
 
@@ -225,8 +248,8 @@ winmm_set_buffer(WinmmOutput *wo, WinmmBuffer *buffer,
 	MMRESULT result = waveOutPrepareHeader(wo->handle, &buffer->hdr,
 					       sizeof(buffer->hdr));
 	if (result != MMSYSERR_NOERROR) {
-		error.Set(winmm_output_domain, result,
-			  "waveOutPrepareHeader() failed");
+		SetWaveOutError(error, result,
+				"waveOutPrepareHeader() failed");
 		return false;
 	}
 
@@ -251,8 +274,8 @@ winmm_drain_buffer(WinmmOutput *wo, WinmmBuffer *buffer,
 		if (result == MMSYSERR_NOERROR)
 			return true;
 		else if (result != WAVERR_STILLPLAYING) {
-			error.Set(winmm_output_domain, result,
-				  "waveOutUnprepareHeader() failed");
+			SetWaveOutError(error, result,
+					"waveOutUnprepareHeader() failed");
 			return false;
 		}
 
@@ -278,8 +301,7 @@ winmm_output_play(AudioOutput *ao, const void *chunk, size_t size, Error &error)
 	if (result != MMSYSERR_NOERROR) {
 		waveOutUnprepareHeader(wo->handle, &buffer->hdr,
 				       sizeof(buffer->hdr));
-		error.Set(winmm_output_domain, result,
-			  "waveOutWrite() failed");
+		SetWaveOutError(error, result, "waveOutWrite() failed");
 		return 0;
 	}
 

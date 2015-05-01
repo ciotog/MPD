@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ class DetachedSong;
 class SongLoader;
 class PlaylistVector;
 class Error;
+class AllocatedPath;
 
 typedef std::vector<std::string> PlaylistFileContents;
 
@@ -36,7 +37,7 @@ extern bool playlist_saveAbsolutePaths;
  * Perform some global initialization, e.g. load configuration values.
  */
 void
-spl_global_init(void);
+spl_global_init();
 
 /**
  * Determines whether the specified string is a valid name for a
@@ -44,6 +45,12 @@ spl_global_init(void);
  */
 bool
 spl_valid_name(const char *name_utf8);
+
+AllocatedPath
+spl_map_to_fs(const char *name_utf8, Error &error);
+
+void
+TranslatePlaylistError(Error &error);
 
 /**
  * Returns a list of stored_playlist_info struct pointers.  Returns

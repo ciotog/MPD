@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ struct PcmExport {
 	uint8_t reverse_endian;
 
 	/**
-	 * Open the #pcm_export_state object.
+	 * Open the object.
 	 *
 	 * There is no "close" method.  This function may be called multiple
 	 * times to reuse the object.

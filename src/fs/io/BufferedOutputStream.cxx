@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,17 +41,22 @@ bool
 BufferedOutputStream::Write(const void *data, size_t size)
 {
 	if (gcc_unlikely(last_error.IsDefined()))
+		/* the stream has already failed */
 		return false;
 
+	/* try to append to the current buffer */
 	if (AppendToBuffer(data, size))
 		return true;
 
+	/* not enough room in the buffer - flush it */
 	if (!Flush())
 		return false;
 
+	/* see if there's now enough room */
 	if (AppendToBuffer(data, size))
 		return true;
 
+	/* too large for the buffer: direct write */
 	return os.Write(data, size, last_error);
 }
 

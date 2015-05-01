@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "InotifyDomain.hxx"
 #include "storage/StorageInterface.hxx"
 #include "fs/AllocatedPath.hxx"
-#include "fs/FileSystem.hxx"
+#include "fs/FileInfo.hxx"
 #include "util/Error.hxx"
 #include "Log.hxx"
 
@@ -179,7 +179,6 @@ recursive_watch_subdirectories(WatchDirectory *directory,
 	}
 
 	while ((ent = readdir(dir))) {
-		struct stat st;
 		int ret;
 
 		if (skip_path(ent->d_name))
@@ -187,15 +186,15 @@ recursive_watch_subdirectories(WatchDirectory *directory,
 
 		const auto child_path_fs =
 			AllocatedPath::Build(path_fs, ent->d_name);
-		ret = StatFile(child_path_fs, st);
-		if (ret < 0) {
-			FormatErrno(inotify_domain,
-				    "Failed to stat %s",
-				    child_path_fs.c_str());
+
+		FileInfo fi;
+		if (!GetFileInfo(child_path_fs, fi, error)) {
+			LogError(error);
+			error.Clear();
 			continue;
 		}
 
-		if (!S_ISDIR(st.st_mode))
+		if (!fi.IsDirectory())
 			continue;
 
 		ret = inotify_source->Add(child_path_fs.c_str(), IN_MASK,

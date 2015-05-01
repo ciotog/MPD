@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,10 +23,6 @@
 #include "storage/StorageInterface.hxx"
 #include "storage/FileInfo.hxx"
 #include "util/Error.hxx"
-
-#ifdef HAVE_GLIB
-#include <glib.h>
-#endif
 
 #include <memory>
 
@@ -60,7 +56,7 @@ Ls(Storage &storage, const char *path)
 
 	const char *name;
 	while ((name = dir->Read()) != nullptr) {
-		FileInfo info;
+		StorageFileInfo info;
 		if (!dir->GetInfo(false, info, error)) {
 			printf("Error on %s: %s\n", name, error.GetMessage());
 			error.Clear();
@@ -69,15 +65,15 @@ Ls(Storage &storage, const char *path)
 
 		const char *type = "unk";
 		switch (info.type) {
-		case FileInfo::Type::OTHER:
+		case StorageFileInfo::Type::OTHER:
 			type = "oth";
 			break;
 
-		case FileInfo::Type::REGULAR:
+		case StorageFileInfo::Type::REGULAR:
 			type = "reg";
 			break;
 
-		case FileInfo::Type::DIRECTORY:
+		case StorageFileInfo::Type::DIRECTORY:
 			type = "dir";
 			break;
 		}
@@ -101,14 +97,6 @@ main(int argc, char **argv)
 		fprintf(stderr, "Usage: run_storage COMMAND URI ...\n");
 		return EXIT_FAILURE;
 	}
-
-	/* initialize GLib */
-
-#ifdef HAVE_GLIB
-#if !GLIB_CHECK_VERSION(2,32,0)
-	g_thread_init(NULL);
-#endif
-#endif
 
 	const char *const command = argv[1];
 	const char *const storage_uri = argv[2];

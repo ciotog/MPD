@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,10 @@
 #include "fs/AllocatedPath.hxx"
 #include "Compiler.h"
 
+#ifndef WIN32
+#include "system/FileDescriptor.hxx"
+#endif
+
 #include <assert.h>
 
 #ifdef WIN32
@@ -32,6 +36,7 @@
 #endif
 
 class Path;
+class FileInfo;
 
 class FileReader final : public Reader {
 	AllocatedPath path;
@@ -39,11 +44,25 @@ class FileReader final : public Reader {
 #ifdef WIN32
 	HANDLE handle;
 #else
-	int fd;
+	FileDescriptor fd;
 #endif
 
 public:
 	FileReader(Path _path, Error &error);
+
+#ifdef WIN32
+	FileReader(FileReader &&other)
+		:path(std::move(other.path)),
+		 handle(other.handle) {
+		other.handle = INVALID_HANDLE_VALUE;
+	}
+#else
+	FileReader(FileReader &&other)
+		:path(std::move(other.path)),
+		 fd(other.fd) {
+		other.fd.SetUndefined();
+	}
+#endif
 
 	~FileReader() {
 		if (IsDefined())
@@ -55,11 +74,21 @@ public:
 #ifdef WIN32
 		return handle != INVALID_HANDLE_VALUE;
 #else
-		return fd >= 0;
+		return fd.IsDefined();
 #endif
 	}
 
+#ifndef WIN32
+	FileDescriptor GetFD() const {
+		return fd;
+	}
+#endif
+
 	void Close();
+
+	bool GetFileInfo(FileInfo &info, Error &error) const;
+
+	bool Seek(off_t offset, Error &error);
 
 	/* virtual methods from class Reader */
 	size_t Read(void *data, size_t size, Error &error) override;

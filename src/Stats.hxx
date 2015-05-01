@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,8 @@
 
 class Client;
 
-void stats_global_init(void);
+void
+stats_global_init();
 
 void
 stats_invalidate();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #include "InotifySource.hxx"
 #include "InotifyDomain.hxx"
 #include "util/Error.hxx"
-#include "system/fd_util.h"
+#include "system/FileDescriptor.hxx"
 #include "system/FatalError.hxx"
 #include "Log.hxx"
 
@@ -72,8 +72,8 @@ InotifySource::OnSocketReady(gcc_unused unsigned flags)
 inline
 InotifySource::InotifySource(EventLoop &_loop,
 			     mpd_inotify_callback_t _callback, void *_ctx,
-			     int _fd)
-	:SocketMonitor(_fd, _loop),
+			     FileDescriptor _fd)
+	:SocketMonitor(_fd.Get(), _loop),
 	 callback(_callback), callback_ctx(_ctx)
 {
 	ScheduleRead();
@@ -85,8 +85,8 @@ InotifySource::Create(EventLoop &loop,
 		      mpd_inotify_callback_t callback, void *callback_ctx,
 		      Error &error)
 {
-	int fd = inotify_init_cloexec();
-	if (fd < 0) {
+	FileDescriptor fd;
+	if (!fd.CreateInotify()) {
 		error.SetErrno("inotify_init() has failed");
 		return nullptr;
 	}

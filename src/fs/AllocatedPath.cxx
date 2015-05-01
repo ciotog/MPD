@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,29 +24,14 @@
 #include "util/Error.hxx"
 #include "Compiler.h"
 
-#ifdef HAVE_GLIB
-#include <glib.h>
-#endif
-
-#include <string.h>
-
-#ifdef HAVE_GLIB
-
-inline AllocatedPath::AllocatedPath(Donate, pointer _value)
-	:value(_value) {
-	g_free(_value);
-}
-
-#endif
-
 /* no inlining, please */
 AllocatedPath::~AllocatedPath() {}
 
 AllocatedPath
 AllocatedPath::FromUTF8(const char *path_utf8)
 {
-#ifdef HAVE_GLIB
-	return AllocatedPath(Donate(), ::PathFromUTF8(path_utf8));
+#if defined(HAVE_FS_CHARSET) || defined(WIN32)
+	return AllocatedPath(::PathFromUTF8(path_utf8));
 #else
 	return FromFS(path_utf8);
 #endif
@@ -76,38 +61,16 @@ AllocatedPath::ToUTF8() const
 	return ::PathToUTF8(c_str());
 }
 
-const char *
-AllocatedPath::RelativeFS(const char *other_fs) const
-{
-	const size_t l = length();
-	if (memcmp(data(), other_fs, l) != 0)
-		return nullptr;
-
-	other_fs += l;
-	if (*other_fs != 0) {
-		if (!PathTraitsFS::IsSeparator(*other_fs))
-			/* mismatch */
-			return nullptr;
-
-		/* skip remaining path separators */
-		do {
-			++other_fs;
-		} while (PathTraitsFS::IsSeparator(*other_fs));
-	}
-
-	return other_fs;
-}
-
 void
 AllocatedPath::ChopSeparators()
 {
 	size_t l = length();
-	const char *p = data();
+	const auto *p = data();
 
 	while (l >= 2 && PathTraitsFS::IsSeparator(p[l - 1])) {
 		--l;
 
-#if GCC_CHECK_VERSION(4,7) && !defined(__clang__)
+#if GCC_CHECK_VERSION(4,7)
 		value.pop_back();
 #else
 		value.erase(value.end() - 1, value.end());

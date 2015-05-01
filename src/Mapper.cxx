@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,8 @@ mapper_init(AllocatedPath &&_playlist_dir)
 		mapper_set_playlist_dir(std::move(_playlist_dir));
 }
 
-void mapper_finish(void)
+void
+mapper_finish()
 {
 }
 
@@ -86,9 +87,9 @@ map_uri_fs(const char *uri)
 }
 
 std::string
-map_fs_to_utf8(const char *path_fs)
+map_fs_to_utf8(Path path_fs)
 {
-	if (PathTraitsFS::IsSeparator(path_fs[0])) {
+	if (path_fs.IsAbsolute()) {
 		if (instance->storage == nullptr)
 			return std::string();
 
@@ -96,18 +97,20 @@ map_fs_to_utf8(const char *path_fs)
 		if (music_dir_fs.IsNull())
 			return std::string();
 
-		path_fs = music_dir_fs.RelativeFS(path_fs);
-		if (path_fs == nullptr || *path_fs == 0)
+		auto relative = music_dir_fs.Relative(path_fs);
+		if (relative == nullptr || *relative == 0)
 			return std::string();
+
+		path_fs = Path::FromFS(relative);
 	}
 
-	return PathToUTF8(path_fs);
+	return path_fs.ToUTF8();
 }
 
 #endif
 
 const AllocatedPath &
-map_spl_path(void)
+map_spl_path()
 {
 	return playlist_dir_fs;
 }

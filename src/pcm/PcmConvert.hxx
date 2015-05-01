@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,11 +74,8 @@ public:
 	/**
 	 * Converts PCM data between two audio formats.
 	 *
-	 * @param src_format the source audio format
 	 * @param src the source PCM buffer
-	 * @param dest_format the requested destination audio format
-	 * @param error_r location to store the error occurring, or nullptr to
-	 * ignore errors
+	 * @param error location to store the error occurring
 	 * @return the destination buffer, or nullptr on error
 	 */
 	ConstBuffer<void> Convert(ConstBuffer<void> src, Error &error);

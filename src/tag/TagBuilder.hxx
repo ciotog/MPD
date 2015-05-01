@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -138,7 +138,7 @@ public:
 	 *
 	 * @param type the type of the new tag item
 	 * @param value the value of the tag item (not null-terminated)
-	 * @param len the length of #value
+	 * @param length the length of #value
 	 */
 	gcc_nonnull_all
 	void AddItem(TagType type, const char *value, size_t length);

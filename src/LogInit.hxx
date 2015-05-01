@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2014 The Music Player Daemon Project
+ * Copyright (C) 2003-2015 The Music Player Daemon Project
  * http://www.musicpd.org
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,10 +37,11 @@ bool
 log_init(bool verbose, bool use_stdout, Error &error);
 
 void
-log_deinit(void);
+log_deinit();
 
 void setup_log_output(bool use_stdout);
 
-int cycle_log_files(void);
+int
+cycle_log_files();
 
 #endif /* LOG_H */
